@@ -1,4 +1,4 @@
-# Plugin Dateien Setup
+# nvim-sioyek-highlights
 
 **DEMO**
 
@@ -6,7 +6,6 @@
 
 
 ## README.md
-# nvim-sioyek-highlights
 
 A Neovim plugin to integrate Sioyek PDF reader highlights directly into your editor. 
 
