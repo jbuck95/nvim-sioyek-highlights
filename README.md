@@ -9,13 +9,12 @@
 ```markdown
 # nvim-sioyek-highlights
 
-A Neovim plugin to integrate Sioyek PDF reader highlights directly into your editor.
+A Neovim plugin to integrate Sioyek PDF reader highlights directly into your editor. 
 
 ## Features
 
-- Browse and search through your Sioyek highlights using Telescope
+- fuzzy-search through your Sioyek highlight-database using Telescope
 - Insert highlights as formatted quotes into your current buffer
-- Beautiful preview window with proper text wrapping
 - Support for both highlight descriptions and annotations
 
 ## Requirements
@@ -78,6 +77,11 @@ sudo apt install sqlite3
 ```bash
 brew install sqlite3
 ```
+
+## Todo
+
+- [ ] proper PDF-Names
+- [ ] update formatting/ add format options. 
 
 ## License
 
