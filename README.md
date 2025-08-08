@@ -1,5 +1,10 @@
 # Plugin Dateien Setup
 
+**DEMO**
+
+![Demo](sh.gif)
+
+
 ## README.md
 ```markdown
 # nvim-sioyek-highlights
