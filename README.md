@@ -81,77 +81,11 @@ brew install sqlite3
 - [ ] proper PDF-Names
 - [ ] update formatting/ add format options. 
 
-## License
-
-MIT License
-```
-
-## plugin/sioyek-highlights.lua
-```lua
--- plugin/sioyek-highlights.lua
-if vim.g.loaded_sioyek_highlights == 1 then
-  return
-end
-vim.g.loaded_sioyek_highlights = 1
-
--- The actual plugin logic is in lua/sioyek-highlights/init.lua
--- This file just ensures the plugin is loaded correctly
-```
-
-## lua/sioyek-highlights/init.lua
-```lua
--- Dein bestehender Code hier, aber als Modul strukturiert:
-
-local M = {}
-
--- Alle deine Funktionen hier...
-local function get_highlights()
-  -- Dein bestehender Code
-end
-
-local function insert_highlight()
-  -- Dein bestehender Code
-end
-
-function M.setup(opts)
-  opts = opts or {}
-  
-  -- Hier könntest du später Konfigurationsoptionen hinzufügen
-  
-  -- Keymap und Command setup
-  vim.keymap.set("n", "<leader>sh", insert_highlight, { desc = "Insert Sioyek Highlight" })
-  vim.api.nvim_create_user_command("SioyekHighlights", insert_highlight, {})
-end
-
--- Für Lazy.nvim Kompatibilität
-function M.config()
-  M.setup()
-end
-
-return M
-```
-
-## .gitignore
-```gitignore
-# Vim/Neovim
-*.swp
-*.swo
-*~
-
-# OS
-.DS_Store
-Thumbs.db
-
-# IDE
-.vscode/
-.idea/
-```
-
 ## LICENSE
 ```
 MIT License
 
-Copyright (c) 2025 [Your Name]
+Copyright (c) 2025 Jan
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
