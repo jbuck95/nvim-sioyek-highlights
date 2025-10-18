@@ -1,8 +1,15 @@
 -- lua/sioyek-highlights/init.lua
 local M = {}
+local config = require("sioyek-highlights.config")
 
 local function get_highlights()
-  local db_path = vim.fn.expand("~/.local/share/sioyek/shared.db")
+  local db_path = config.options.db_path
+
+  -- Check if the database file exists
+  if vim.fn.filereadable(db_path) == 0 then
+    vim.notify("Sioyek database not found at: " .. db_path, vim.log.levels.ERROR)
+    return {}
+  end
   
   -- Make sure the sqlite3 command-line tool is installed.
   if vim.fn.executable("sqlite3") == 0 then
@@ -170,28 +177,24 @@ local function insert_highlight()
           return
         end
         
-        local lines = vim.split(original_text, '\n', { plain = true })
-        local formatted_lines = {}
-        if #lines > 0 then
-          lines[1] = '> *"' .. lines[1]
-          lines[#lines] = lines[#lines] .. '"*'
-          for i, line in ipairs(lines) do
-            if i > 1 then
-              table.insert(formatted_lines, '> ' .. line)
-            else
-              table.insert(formatted_lines, line)
-            end
-          end
-        end
+        local formatted_lines = config.options.format_function(original_text)
 
         local cursor = vim.api.nvim_win_get_cursor(0)
         local row, col = cursor[1], cursor[2]
 
         vim.api.nvim_buf_set_text(0, row - 1, col, row - 1, col, formatted_lines)
 
-        local new_row = row + #formatted_lines - 1
-        local new_col = #formatted_lines[#lines]
-        vim.api.nvim_win_set_cursor(0, { new_row, new_col })
+        local start_line = row
+        local end_line = row + #formatted_lines - 1
+
+        -- Select the lines that were just inserted
+        vim.cmd('normal! ' .. start_line .. 'GV' .. end_line .. 'G')
+        -- Apply formatting
+        vim.cmd('normal! gq')
+        -- Go to the end of the changed text
+        vim.cmd("normal! ']")
+        -- Open a new line below and enter insert mode
+        vim.cmd('normal! oS. ')
       end)
       return true
     end,
@@ -200,10 +203,7 @@ end
 
 -- Das ist die wichtige Funktion für veröffentlichte Plugins
 function M.setup(opts)
-  opts = opts or {}
-  
-  -- Hier kannst du später Konfigurationsoptionen hinzufügen
-  -- z.B. opts.db_path, opts.keymap, etc.
+  config.setup(opts)
   
   -- Keymap und Command erstellen
   vim.keymap.set("n", "<leader>sh", insert_highlight, { desc = "Insert Sioyek Highlight" })
