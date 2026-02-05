@@ -17,8 +17,8 @@ local function get_highlights()
     return {}
   end
 
-  -- Query to get desc, text_annot, and document name from opened_books table
-  local cmd = string.format("sqlite3 -separator '|' '%s' \"SELECT h.desc, h.text_annot, h.document_path, ob.document_name FROM highlights h LEFT JOIN opened_books ob ON h.document_path = ob.path WHERE h.desc != '' OR h.text_annot != '';\"", db_path)
+  -- Query to get desc, text_annot, document name, and modification_time
+  local cmd = string.format("sqlite3 -separator '|' '%s' \"SELECT h.desc, h.text_annot, h.document_path, COALESCE(ob.document_name, ''), h.modification_time FROM highlights h LEFT JOIN opened_books ob ON h.document_path = ob.path WHERE h.desc != '' OR h.text_annot != '' ORDER BY h.modification_time DESC;\"", db_path)
   local handle = io.popen(cmd)
   if not handle then return {} end
 
@@ -28,18 +28,25 @@ local function get_highlights()
   local highlights = {}
   for line in result:gmatch("[^\r\n]+") do
     local parts = vim.split(line, "|", { plain = true })
-    if #parts >= 3 then
+    if #parts >= 4 then
       local desc = parts[1] and parts[1]:gsub("^%s+", ""):gsub("%s+$", "") or ""
       local text_annot = parts[2] and parts[2]:gsub("^%s+", ""):gsub("%s+$", "") or ""
       local document_hash = parts[3] and parts[3]:gsub("^%s+", ""):gsub("%s+$", "") or ""
       local document_name = parts[4] and parts[4]:gsub("^%s+", ""):gsub("%s+$", "") or ""
+      local modification_time = parts[5] and parts[5]:gsub("^%s+", ""):gsub("%s+$", "") or ""
+      
+      -- Format timestamp (remove seconds)
+      local formatted_time = ""
+      if modification_time ~= "" then
+        formatted_time = modification_time:match("(%d%d%d%d%-%d%d%-%d%d %d%d:%d%d)") or modification_time
+      end
       
       -- Use document_name if available, otherwise fallback to hash
       local pdf_name = "Unknown PDF"
       if document_name ~= "" then
-        pdf_name = vim.fn.fnamemodify(document_name, ":t") -- Nur Dateiname
+        pdf_name = vim.fn.fnamemodify(document_name, ":t")
       elseif document_hash ~= "" then
-        pdf_name = document_hash:sub(1, 12) .. "..." -- Show first 12 chars of hash
+        pdf_name = document_hash:sub(1, 12) .. "..."
       end
       
       -- Only add if at least one field has content
@@ -48,7 +55,8 @@ local function get_highlights()
           desc = desc, 
           text_annot = text_annot, 
           pdf_name = pdf_name,
-          document_path = document_hash
+          document_path = document_hash,
+          timestamp = formatted_time
         })
       end
     end
@@ -70,7 +78,7 @@ local function insert_highlight()
   end
 
   pickers.new({}, {
-    prompt_title = "Sioyek Highlights",
+    prompt_title = "Search",
     layout_strategy = "vertical",
     layout_config = {
       vertical = {
@@ -82,6 +90,7 @@ local function insert_highlight()
         height = 0.9,
       },
     },
+    default_selection_index = #highlights,
     finder = finders.new_table({
       results = highlights,
       entry_maker = function(entry)
@@ -135,6 +144,9 @@ local function insert_highlight()
         
         if entry.value.pdf_name and entry.value.pdf_name ~= "" then
           table.insert(lines, "📄 PDF: " .. entry.value.pdf_name)
+          if entry.value.timestamp ~= "" then
+            table.insert(lines, "🕒 " .. entry.value.timestamp)
+          end
           table.insert(lines, "")
         end
         
