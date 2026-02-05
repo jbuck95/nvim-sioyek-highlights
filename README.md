@@ -9,11 +9,26 @@
 
 A Neovim plugin to integrate Sioyek PDF reader highlights directly into your editor. 
 
+1. Import Highlights directly under Cursor via TUI
+2. Jump from Citation back to the PDF! 
+
+
 ## Features
 
+**Import:** 
 - fuzzy-search through your Sioyek highlight-database using Telescope
 - Insert highlights as formatted quotes into your current buffer
 - Support for both highlight descriptions and annotations
+
+**Jump**
+- if your Cursor is above a citation/highlight, press `leader s j` to
+jump to the location of the highlight in the PDF. This uses running
+Sioyek instance or opens a new if none is running. 
+- searching for words only so you have no trouble formatting the
+citation however you want 
+- searching for words only so you have no trouble formatting the
+citation however you want 
+
 
 ## Requirements
 
@@ -51,7 +66,9 @@ use {
 - `<leader>sh` - Open Sioyek highlights picker
 - `:SioyekHighlights` - Command to open the picker
 
-Select a highlight and press Enter to insert it as a formatted quote at your cursor position.
+- `<leader>sj` - Jump to highlight
+- `:SioyekJump` 
+
 
 ## Configuration
 
@@ -78,7 +95,6 @@ brew install sqlite3
 
 ## Todo
 
-- [ ] proper PDF-Names
 - [ ] update formatting/ add format options. 
 
 ## LICENSE

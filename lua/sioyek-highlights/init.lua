@@ -213,11 +213,47 @@ local function insert_highlight()
   }):find()
 end
 
+-- Open PDF / jump to highlights
+function M.jump_to_highlight()
+	local plugin_root = vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":p:h:h:h")
+	local script_path = plugin_root .. "/scripts/jump_to_highlight.py"
+  
+  local function get_search_text()
+    local text = ""
+    if vim.api.nvim_get_mode().mode:find("[vV]") then
+      vim.cmd('normal! "y')
+      text = vim.fn.getreg('"')
+    else
+      local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+      local cur = vim.api.nvim_win_get_cursor(0)[1]
+      local line = lines[cur] or ""
+      text = line:gsub("^%s*>%s*", ""):gsub("^[%*%s%p]+", "")
+    end
+    return text:gsub("%s+", " "):gsub("^%s*", ""):gsub("%s*$", "")
+  end
+
+  local text = get_search_text()
+  local words = {}
+  
+  for w in text:gmatch("%S+") do
+    local clean_word = w:gsub("[%*%p]", "")
+    if #clean_word > 0 then
+      table.insert(words, clean_word)
+    end
+    if #words >= 6 then break end
+  end
+
+  if #words > 0 then
+    vim.fn.jobstart({"python3", script_path, table.concat(words, " ")}, { detach = true })
+  end
+end
 -- Das ist die wichtige Funktion für veröffentlichte Plugins
 function M.setup(opts)
   config.setup(opts)
   
   -- Keymap und Command erstellen
+	vim.keymap.set({"n", "v"}, "<leader>sj", M.jump_to_highlight, { desc = "Sioyek: Jump" })
+	vim.api.nvim_create_user_command("SioyekJump", M.jump_to_highlight, {})
   vim.keymap.set("n", "<leader>sh", insert_highlight, { desc = "Insert Sioyek Highlight" })
   vim.api.nvim_create_user_command("SioyekHighlights", insert_highlight, {})
 end
