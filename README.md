@@ -2,7 +2,7 @@
 
 **DEMO**
 
-![Demo](sh.gif)
+![Image](https://github.com/user-attachments/assets/dde16808-9bfc-4b38-9465-c4f15f5c9959)
 
 
 ## README.md
