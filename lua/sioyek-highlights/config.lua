@@ -19,6 +19,19 @@ M.options = {
     end
     return formatted_lines
   end,
+  on_insert = function(start_line, end_line)
+    vim.cmd('normal! ' .. start_line .. 'GV' .. end_line .. 'G')
+    vim.cmd('normal! gq')
+    vim.cmd("normal! ']")
+    local pos = vim.api.nvim_win_get_cursor(0)
+    local line = vim.api.nvim_buf_get_lines(0, pos[1] - 1, pos[1], false)[1]
+    vim.api.nvim_win_set_cursor(0, { pos[1], #line })
+    local ok, fn = pcall(require, 'footnote')
+    if ok then
+      fn.new_footnote()
+      vim.cmd('normal! A ')
+    end
+  end,
 }
 
 function M.setup(options)

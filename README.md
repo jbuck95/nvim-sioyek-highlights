@@ -37,6 +37,17 @@ citation however you want
 - `sqlite3` command-line tool
 - [Sioyek PDF reader](https://sioyek.info/)
 
+## Verify
+
+`:checkhealth sioyek-highlights`
+
+## Dependencies
+
+- `sqlite3` — database CLI
+- `python3` — for helper scripts
+- [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim)
+- Optional: [sioyek](https://sioyek.info/) — PDF viewer
+
 ## Installation
 
 ### Using [lazy.nvim](https://github.com/folke/lazy.nvim)

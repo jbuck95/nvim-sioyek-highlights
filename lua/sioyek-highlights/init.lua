@@ -199,14 +199,7 @@ local function insert_highlight()
         local start_line = row
         local end_line = row + #formatted_lines - 1
 
-        -- Select the lines that were just inserted
-        vim.cmd('normal! ' .. start_line .. 'GV' .. end_line .. 'G')
-        -- Apply formatting
-        vim.cmd('normal! gq')
-        -- Go to the end of the changed text
-        vim.cmd("normal! ']")
-        -- Open a new line below and enter insert mode
-        vim.cmd('normal! oS. ')
+        config.options.on_insert(start_line, end_line)
       end)
       return true
     end,
@@ -247,7 +240,7 @@ function M.jump_to_highlight()
     vim.fn.jobstart({"python3", script_path, table.concat(words, " ")}, { detach = true })
   end
 end
--- Das ist die wichtige Funktion für veröffentlichte Plugins
+
 function M.setup(opts)
   config.setup(opts)
   
