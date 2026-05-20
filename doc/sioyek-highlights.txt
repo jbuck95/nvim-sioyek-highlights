@@ -1,0 +1,136 @@
+*sioyek-highlights.txt*	   Sioyek highlight integration for Neovim
+
+==============================================================================
+CONTENTS                                 *sioyek-highlights.contents*
+
+  1. Introduction ................... |sioyek-highlights.intro|
+  2. Installation ................... |sioyek-highlights.install|
+  3. Configuration .................. |sioyek-highlights.config|
+  4. Commands ....................... |sioyek-highlights.commands|
+  5. Mappings ....................... |sioyek-highlights.mappings|
+  6. API ............................ |sioyek-highlights.api|
+  7. Health ......................... |sioyek-highlights.health|
+
+==============================================================================
+INTRODUCTION                                     *sioyek-highlights.intro*
+
+A Neovim plugin to integrate Sioyek PDF reader highlights directly into
+the editor. Imports highlights as formatted quotes and provides quick
+navigation from citations back to the PDF.
+
+Requirements: Neovim >= 0.8, telescope.nvim, sqlite3, python3, Sioyek.
+
+==============================================================================
+INSTALLATION                                   *sioyek-highlights.install*
+
+Using lazy.nvim: >
+
+  {
+    "jbuck95/nvim-sioyek-highlights",
+    dependencies = { "nvim-telescope/telescope.nvim" },
+  }
+<
+Using packer.nvim: >
+
+  use {
+    "jbuck95/nvim-sioyek-highlights",
+    requires = { "nvim-telescope/telescope.nvim" },
+  }
+<
+The plugin auto-initializes, no `config` block required.
+
+==============================================================================
+CONFIGURATION                                 *sioyek-highlights.config*
+
+Default configuration: >
+
+  {
+    db_path = "~/.local/share/sioyek/shared.db",
+    format_function = function(text) ... end,
+    on_insert = function(start_line, end_line) ... end,
+  }
+<
+Override via `setup()`: >
+
+  require("sioyek-highlights").setup({
+    db_path = "/custom/path/to/shared.db",
+  })
+<
+                                                 *sioyek-highlights.db_path*
+  `db_path` (string, optional)
+    Path to the Sioyek highlights database.
+    Default: `~/.local/share/sioyek/shared.db`
+
+                                               *sioyek-highlights.format_function*
+  `format_function` (fun(text: string): string[], optional)
+    Formats raw highlight text into lines for insertion.
+    Receives the original highlight text and returns a list of lines.
+
+                                               *sioyek-highlights.on_insert*
+  `on_insert` (fun(start_line: number, end_line: number), optional)
+    Called after inserting highlights. Receives the line range of
+    inserted text. Default formats as blockquote, reflows with `gq`,
+    and optionally inserts a footnote.
+
+==============================================================================
+COMMANDS                                      *sioyek-highlights.commands*
+
+Scoped command (recommended): >
+
+  :Sioyek jump           Jump to highlight in PDF
+  :Sioyek highlights     Open highlight picker
+<
+Legacy commands (backward compatible): >
+
+  :SioyekJump            Same as `:Sioyek jump`
+  :SioyekHighlights      Same as `:Sioyek highlights`
+<
+==============================================================================
+MAPPINGS                                      *sioyek-highlights.mappings*
+
+The plugin sets default keymaps automatically:
+
+  <leader>sj   Jump to highlight in PDF (normal and visual mode)
+  <leader>sh   Open highlight picker (normal mode)
+
+<Plug> mappings for custom binds: >
+
+  <Plug>(sioyek-jump)         Jump to highlight (n, v)
+  <Plug>(sioyek-highlights)   Open highlight picker (n)
+<
+Example custom mapping: >
+
+  vim.keymap.set("n", "gsj", "<Plug>(sioyek-jump)")
+  vim.keymap.set("n", "gsh", "<Plug>(sioyek-highlights)")
+<
+==============================================================================
+API                                           *sioyek-highlights.api*
+
+                                                          *sioyek-highlights.setup()*
+  setup({opts}) ~
+    Configure and initialize the plugin. Called automatically on load.
+    Parameters: `opts` (table?, optional) configuration overrides.
+
+                                                          *sioyek-highlights.insert_highlight()*
+  insert_highlight() ~
+    Open the Telescope picker and insert the selected highlight.
+    Callable as `require("sioyek-highlights").insert_highlight()`.
+
+                                                          *sioyek-highlights.jump_to_highlight()*
+  jump_to_highlight() ~
+    Jump to the highlight under the cursor in Sioyek.
+    Callable as `require("sioyek-highlights").jump_to_highlight()`.
+
+==============================================================================
+HEALTH                                        *sioyek-highlights.health*
+
+Run `:checkhealth sioyek-highlights` to verify:
+  - sqlite3 in PATH
+  - python3 in PATH
+  - sioyek in PATH
+  - shared.db exists
+  - telescope.nvim installed
+  - plugin initialized
+
+==============================================================================
+ vim:tw=78:ts=8:ft=help:norl:
