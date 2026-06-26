@@ -1,0 +1,15 @@
+sioyek-highlights.api	sioyek-highlights.txt	/*sioyek-highlights.api*
+sioyek-highlights.commands	sioyek-highlights.txt	/*sioyek-highlights.commands*
+sioyek-highlights.config	sioyek-highlights.txt	/*sioyek-highlights.config*
+sioyek-highlights.contents	sioyek-highlights.txt	/*sioyek-highlights.contents*
+sioyek-highlights.db_path	sioyek-highlights.txt	/*sioyek-highlights.db_path*
+sioyek-highlights.format_function	sioyek-highlights.txt	/*sioyek-highlights.format_function*
+sioyek-highlights.health	sioyek-highlights.txt	/*sioyek-highlights.health*
+sioyek-highlights.insert_highlight()	sioyek-highlights.txt	/*sioyek-highlights.insert_highlight()*
+sioyek-highlights.install	sioyek-highlights.txt	/*sioyek-highlights.install*
+sioyek-highlights.intro	sioyek-highlights.txt	/*sioyek-highlights.intro*
+sioyek-highlights.jump_to_highlight()	sioyek-highlights.txt	/*sioyek-highlights.jump_to_highlight()*
+sioyek-highlights.mappings	sioyek-highlights.txt	/*sioyek-highlights.mappings*
+sioyek-highlights.on_insert	sioyek-highlights.txt	/*sioyek-highlights.on_insert*
+sioyek-highlights.setup()	sioyek-highlights.txt	/*sioyek-highlights.setup()*
+sioyek-highlights.txt	sioyek-highlights.txt	/*sioyek-highlights.txt*

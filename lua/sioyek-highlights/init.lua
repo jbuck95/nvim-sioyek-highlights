@@ -212,16 +212,30 @@ function M.jump_to_highlight()
 	local script_path = plugin_root .. "/scripts/jump_to_highlight.py"
   
   local function get_search_text()
-    local text = ""
     if vim.api.nvim_get_mode().mode:find("[vV]") then
       vim.cmd('normal! "y')
-      text = vim.fn.getreg('"')
-    else
-      local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-      local cur = vim.api.nvim_win_get_cursor(0)[1]
-      local line = lines[cur] or ""
-      text = line:gsub("^%s*>%s*", ""):gsub("^[%*%s%p]+", "")
+      local text = vim.fn.getreg('"')
+      return text:gsub("%s+", " "):gsub("^%s*", ""):gsub("%s*$", "")
     end
+    local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+    local cur = vim.api.nvim_win_get_cursor(0)[1]
+    local line = lines[cur] or ""
+
+    -- In einem mehrzeiligen Blockquote: erste/letzte Zeile meiden,
+    -- weil dort " und [^fn] und * den Strip stören
+    if line:match("^%s*>") then
+      local prev = (cur > 1) and (lines[cur - 1] or "") or ""
+      local next = (cur < #lines) and (lines[cur + 1] or "") or ""
+      local prev_bq = prev:match("^%s*>")
+      local next_bq = next:match("^%s*>")
+      if not prev_bq and next_bq then
+        line = next         -- erste Zeile → nächste nehmen
+      elseif not next_bq and prev_bq then
+        line = prev         -- letzte Zeile → vorige nehmen
+      end
+    end
+
+    local text = line:gsub("^%s*>%s*", ""):gsub("^[*]+%s*", "")
     return text:gsub("%s+", " "):gsub("^%s*", ""):gsub("%s*$", "")
   end
 
@@ -237,7 +251,22 @@ function M.jump_to_highlight()
   end
 
   if #words > 0 then
-    vim.fn.jobstart({"python3", script_path, table.concat(words, " ")}, { detach = true })
+    local search_text = table.concat(words, " ")
+    -- Prüfe YAML-Frontmatter auf quelle:-Feld (für Analyse-Dateien)
+    local lines = vim.api.nvim_buf_get_lines(0, 0, 10, false)
+    local pdf_path = nil
+    for _, l in ipairs(lines) do
+      local match = l:match("^quelle:%s*(.+)$")
+      if match then
+        pdf_path = vim.fn.expand(match)
+        break
+      end
+    end
+
+    if pdf_path then
+      search_text = pdf_path .. "||" .. search_text
+    end
+    vim.fn.jobstart({"python3", script_path, search_text}, { detach = true })
   end
 end
 

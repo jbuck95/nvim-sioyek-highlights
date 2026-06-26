@@ -5,7 +5,7 @@
 ![Image](https://github.com/user-attachments/assets/dde16808-9bfc-4b38-9465-c4f15f5c9959)
 
 
-## README.md
+## Description
 
 A Neovim plugin to integrate Sioyek PDF reader highlights directly into your editor. 
 
@@ -26,27 +26,17 @@ jump to the location of the highlight in the PDF. This uses running
 Sioyek instance or opens a new if none is running. 
 - searching for words only so you have no trouble formatting the
 citation however you want 
-- searching for words only so you have no trouble formatting the
-citation however you want 
 
 
 ## Requirements
 
-- Neovim >= 0.8
-- [Telescope.nvim](https://github.com/nvim-telescope/telescope.nvim)
-- `sqlite3` command-line tool
-- [Sioyek PDF reader](https://sioyek.info/)
-
-## Verify
-
-`:checkhealth sioyek-highlights`
-
-## Dependencies
-
+- [sioyek](https://sioyek.info/) — PDF viewer 
+- [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim)
 - `sqlite3` — database CLI
 - `python3` — for helper scripts
-- [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim)
-- Optional: [sioyek](https://sioyek.info/) — PDF viewer
+- Optional: `PyMuPDF` (`pip install PyMuPDF`) — for precise page coordinate calculation in jump feature. Falls back to basic PDF opening if not available.
+
+Verify your setup with `:checkhealth sioyek-highlights`. See `:h sioyek-highlights` for detailed help.
 
 ## Installation
 
@@ -81,32 +71,49 @@ use {
 - `:SioyekJump` 
 
 
+## Lua API
+
+```lua
+local sh = require("sioyek-highlights")
+
+-- Optional: override defaults
+sh.setup({
+  db_path = "~/.local/share/sioyek/shared.db",
+  format_function = function(text) ... end,  -- format highlight before insert
+  on_insert = function(start_line, end_line) ... end,  -- callback after insert
+})
+
+-- Jump from cursor line to PDF highlight
+sh.jump_to_highlight()
+```
+
 ## Configuration
 
-The plugin works out of the box with default Sioyek database location (`~/.local/share/sioyek/shared.db`).
+| Option | Default | Description |
+|--------|---------|-------------|
+| `db_path` | `~/.local/share/sioyek/shared.db` | Path to Sioyek highlight database |
+| `format_function` | wraps text as `> *"..."*` | Function to format inserted highlight |
+| `on_insert` | gq + footnote integration | Callback after highlight insertion |
 
-## Requirements
+## Minimal Config for Issues
 
-Make sure you have `sqlite3` installed:
-
-**Arch Linux:**
-```bash
-sudo pacman -S sqlite
+```lua
+vim.cmd([[set rtp+=~/.local/share/nvim/lazy/nvim-sioyek-highlights]])
+require("sioyek-highlights").setup()
 ```
 
-**Ubuntu/Debian:**
-```bash
-sudo apt install sqlite3
-```
+## Credits
 
-**macOS:**
-```bash
-brew install sqlite3
-```
+Integrates with [Sioyek](https://sioyek.info/) PDF reader and [Telescope](https://github.com/nvim-telescope/telescope.nvim).
 
 ## Todo
 
-- [ ] update formatting/ add format options. 
+- [x] update formatting/ add format options.
+
+## Disclaimer
+
+Built for my personal master's thesis workflow.
+AI was used extensively in development.
 
 ## LICENSE
 ```
