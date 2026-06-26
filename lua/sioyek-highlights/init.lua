@@ -236,6 +236,7 @@ function M.jump_to_highlight()
     end
 
     local text = line:gsub("^%s*>%s*", ""):gsub("^[*]+%s*", "")
+    text = text:gsub("%[%^[^%]]+%]", "")
     return text:gsub("%s+", " "):gsub("^%s*", ""):gsub("%s*$", "")
   end
 
