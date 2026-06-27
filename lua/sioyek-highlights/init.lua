@@ -243,7 +243,23 @@ function M.jump_to_highlight()
     local text = line:gsub("^%s*>%s*", ""):gsub("^[*]+%s*", "")
     text = text:gsub("%[%^[^%]]+%]", "")
     text = text:gsub("%s*[*]+$", ""):gsub('^["„"»]', ""):gsub('[""“»]$', "")
-    return text:gsub("%s+", " "):gsub("^%s*", ""):gsub("%s*$", "")
+    text = text:gsub("%s+", " "):gsub("^%s*", ""):gsub("%s*$", "")
+
+    local wc = 0
+    for _ in text:gmatch("%S+") do wc = wc + 1 end
+    if wc < 8 then
+      local s, f = cur, cur
+      while s > 1 and lines[s - 1] ~= "" do s = s - 1 end
+      while f < #lines and lines[f + 1] ~= "" do f = f + 1 end
+      local parts = {}
+      for i = s, f do table.insert(parts, lines[i]) end
+      local para = table.concat(parts, " ")
+      para = para:gsub("%[%^[^%]]+%]", "")
+      para = para:gsub('["„"»""“»]', "")
+      para = para:gsub("%s+", " "):gsub("^%s*", ""):gsub("%s*$", "")
+      if #para > #text then text = para end
+    end
+    return text
   end
 
   local text = get_search_text()
