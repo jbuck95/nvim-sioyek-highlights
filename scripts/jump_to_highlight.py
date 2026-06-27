@@ -125,24 +125,26 @@ def reverse_highlight_and_jump(pdf_path, search_text):
 
 
 def _highlight_search(search_text):
-    sig = ' '.join(search_text.split()[:6])
+    words = [re.sub(r'[^\w-]', '', w) for w in search_text.split() if re.sub(r'[^\w-]', '', w)]
+    sig = ' '.join(words[:4])
     if not sig:
         return
     time.sleep(0.3)
     subprocess.run([
         "sioyek", "--execute-command", "search",
-        "--execute-command-data", f'"{sig}"'
+        "--execute-command-data", sig
     ])
     subprocess.Popen(["sioyek", "--execute-command", "next_item"])
 
 
 def _sioyek_search(pdf_path, search_text):
-    sig = ' '.join(search_text.split()[:8])
+    words = [re.sub(r'[^\w-]', '', w) for w in search_text.split() if re.sub(r'[^\w-]', '', w)]
+    sig = ' '.join(words[:6])
     subprocess.Popen(["sioyek", str(pdf_path)])
     time.sleep(0.5)
     subprocess.run([
         "sioyek", "--execute-command", "search",
-        "--execute-command-data", f'"{sig}"'
+        "--execute-command-data", sig
     ])
     subprocess.Popen(["sioyek", "--execute-command", "next_item"])
 
