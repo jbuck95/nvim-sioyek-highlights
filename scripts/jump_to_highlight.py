@@ -124,6 +124,18 @@ def reverse_highlight_and_jump(pdf_path, search_text):
     return True
 
 
+def _highlight_search(search_text):
+    sig = ' '.join(search_text.split()[:6])
+    if not sig:
+        return
+    time.sleep(0.3)
+    subprocess.run([
+        "sioyek", "--execute-command", "search",
+        "--execute-command-data", f'"{sig}"'
+    ])
+    subprocess.Popen(["sioyek", "--execute-command", "next_item"])
+
+
 def _sioyek_search(pdf_path, search_text):
     sig = ' '.join(search_text.split()[:8])
     subprocess.Popen(["sioyek", str(pdf_path)])
@@ -141,8 +153,10 @@ def find_and_jump(search_text, pdf_path=None):
         result = search_highlights(search_text, doc_hash) if doc_hash else None
         if result:
             open_at_position(pdf_path, result[1])
+            _highlight_search(search_text)
             return True
         if reverse_highlight_and_jump(pdf_path, search_text):
+            _highlight_search(search_text)
             return True
         _sioyek_search(pdf_path, search_text)
         return True
@@ -153,6 +167,7 @@ def find_and_jump(search_text, pdf_path=None):
         resolved = get_pdf_path(doc_hash)
         if resolved and Path(resolved).exists():
             open_at_position(resolved, begin_y)
+            _highlight_search(search_text)
             return True
 
     local_db = Path.home() / ".local/share/sioyek/local.db"
