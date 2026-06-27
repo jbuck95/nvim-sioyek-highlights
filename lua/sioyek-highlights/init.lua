@@ -236,13 +236,13 @@ function M.jump_to_highlight()
       end
       local text = table.concat(parts, " ")
       text = text:gsub("%[%^[^%]]+%]", "")
-      text = text:gsub("%s*[*]+$", ""):gsub('^"', ""):gsub('"$', "")
+      text = text:gsub("%s*[*]+$", ""):gsub('^["„"»]', ""):gsub('[""“»]$', "")
       return text:gsub("%s+", " "):gsub("^%s*", ""):gsub("%s*$", "")
     end
 
     local text = line:gsub("^%s*>%s*", ""):gsub("^[*]+%s*", "")
     text = text:gsub("%[%^[^%]]+%]", "")
-    text = text:gsub("%s*[*]+$", ""):gsub('^"', ""):gsub('"$', "")
+    text = text:gsub("%s*[*]+$", ""):gsub('^["„"»]', ""):gsub('[""“»]$', "")
     return text:gsub("%s+", " "):gsub("^%s*", ""):gsub("%s*$", "")
   end
 

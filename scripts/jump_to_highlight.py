@@ -4,7 +4,6 @@ import sys
 import subprocess
 import sqlite3
 import time
-import uuid
 from pathlib import Path
 
 
@@ -36,9 +35,9 @@ def get_pdf_path(doc_hash):
 
 def search_highlights(search_text, doc_hash=None):
     shared_db = Path.home() / ".local/share/sioyek/shared.db"
-    # remove punctuation but keep hyphens (e.g. "BCI-driven")
     words = [re.sub(r'[^\w-]', '', w) for w in search_text.split() if re.sub(r'[^\w-]', '', w)]
-    fuzzy = "%" + "%".join(words) + "%"
+    # Nur erste 12 Wörter für den Fuzzy-Pattern (DB-Text ist oft kürzer als Blockquote)
+    fuzzy = "%" + "%".join(words[:12]) + "%"
 
     try:
         conn = sqlite3.connect(str(shared_db))
@@ -108,38 +107,19 @@ def find_text_position(pdf_path, search_text):
     return None
 
 
-def create_highlight(doc_hash, search_text, begin_y, end_y):
-    shared_db = Path.home() / ".local/share/sioyek/shared.db"
-    now = time.strftime("%Y-%m-%d %H:%M:%S")
-    uid = str(uuid.uuid4())
-    try:
-        conn = sqlite3.connect(str(shared_db))
-        conn.execute(
-            """INSERT INTO highlights
-               (document_path, desc, type, begin_x, begin_y, end_x, end_y,
-                text_annot, creation_time, modification_time, uuid)
-               VALUES (?, ?, 'h', 0, ?, 0, ?, '', ?, ?, ?)""",
-            (doc_hash, search_text, begin_y, end_y, now, now, uid),
-        )
-        conn.commit()
-        conn.close()
-        return True
-    except sqlite3.Error:
-        return False
-
-
 def reverse_highlight_and_jump(pdf_path, search_text):
     pos = find_text_position(pdf_path, search_text)
     if pos is None:
         return False
 
     page_num, begin_y, end_y = pos
-    doc_hash = get_doc_hash(pdf_path)
-    if doc_hash and search_text:
-        create_highlight(doc_hash, search_text, begin_y, end_y)
+    import fitz
+    doc = fitz.open(pdf_path)
+    y_on_page = begin_y - sum(doc[i].rect.height for i in range(page_num))
+    doc.close()
 
     subprocess.Popen(
-        ["sioyek", pdf_path, "--page", str(page_num + 1), "--yloc", str(begin_y)]
+        ["sioyek", pdf_path, "--page", str(page_num + 1), "--yloc", str(y_on_page)]
     )
     return True
 
