@@ -221,34 +221,36 @@ function M.jump_to_highlight()
     local cur = vim.api.nvim_win_get_cursor(0)[1]
     local line = lines[cur] or ""
 
-    -- In einem mehrzeiligen Blockquote: erste/letzte Zeile meiden,
-    -- weil dort " und [^fn] und * den Strip stören
     if line:match("^%s*>") then
-      local prev = (cur > 1) and (lines[cur - 1] or "") or ""
-      local next = (cur < #lines) and (lines[cur + 1] or "") or ""
-      local prev_bq = prev:match("^%s*>")
-      local next_bq = next:match("^%s*>")
-      if not prev_bq and next_bq then
-        line = next         -- erste Zeile → nächste nehmen
-      elseif not next_bq and prev_bq then
-        line = prev         -- letzte Zeile → vorige nehmen
+      local start, finish = cur, cur
+      while start > 1 and (lines[start - 1] or ""):match("^%s*>") do
+        start = start - 1
       end
+      while finish < #lines and (lines[finish + 1] or ""):match("^%s*>") do
+        finish = finish + 1
+      end
+      local parts = {}
+      for i = start, finish do
+        local cleaned = lines[i]:gsub("^%s*>%s*", ""):gsub("^[*]+%s*", "")
+        table.insert(parts, cleaned)
+      end
+      local text = table.concat(parts, " ")
+      text = text:gsub("%[%^[^%]]+%]", "")
+      text = text:gsub("%s*[*]+$", ""):gsub('^"', ""):gsub('"$', "")
+      return text:gsub("%s+", " "):gsub("^%s*", ""):gsub("%s*$", "")
     end
 
     local text = line:gsub("^%s*>%s*", ""):gsub("^[*]+%s*", "")
     text = text:gsub("%[%^[^%]]+%]", "")
+    text = text:gsub("%s*[*]+$", ""):gsub('^"', ""):gsub('"$', "")
     return text:gsub("%s+", " "):gsub("^%s*", ""):gsub("%s*$", "")
   end
 
   local text = get_search_text()
   local words = {}
-  
+
   for w in text:gmatch("%S+") do
-    local clean_word = w:gsub("[%*%p]", "")
-    if #clean_word > 0 then
-      table.insert(words, clean_word)
-    end
-    if #words >= 6 then break end
+    table.insert(words, w)
   end
 
   if #words > 0 then
@@ -259,6 +261,7 @@ function M.jump_to_highlight()
     for _, l in ipairs(lines) do
       local match = l:match("^quelle:%s*(.+)$")
       if match then
+        match = match:gsub("^[\"']+", ""):gsub("[\"']+$", "")
         pdf_path = vim.fn.expand(match)
         break
       end
